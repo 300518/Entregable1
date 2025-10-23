@@ -121,7 +121,7 @@ function cancelarTurnoPorNumero() {
     return;
   }
 
-  // Eliminar usando splice
+  // Eliminar usando, se averigua la función splice.
   const eliminado = colaTurnos.splice(idx, 1)[0];
   alert("Turno cancelado:\nN° " + eliminado.numero + " — " + eliminado.nombre);
   console.log("Turno eliminado:", eliminado);
@@ -225,4 +225,12 @@ function llenarColaDePrueba() {
 }
 
 // ---------- Llamada inicial para ejecutar el menú al cargar la página ----------
-menuPrincipal();
+//menuPrincipal();
+document.addEventListener("DOMContentLoaded", () => {
+    const boton = document.getElementById("btnIniciar");
+    //Se genera y averigua función para el click de botonera.
+    boton.addEventListener("click", () => {
+      alert("¡Bienvenido al simulador de turnos!");
+      menuPrincipal();
+    });
+  });

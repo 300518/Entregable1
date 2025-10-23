@@ -230,7 +230,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const boton = document.getElementById("btnIniciar");
     //Se genera y averigua función para el click de botonera.
     boton.addEventListener("click", () => {
-      alert("¡Bienvenido al simulador de turnos!");
+      alert("¡Bienvenido al simulador de turnos!\nTe recordamos abrir la consola previamente\nSi no lo hiciste, hazlo y actualiza la página");
       menuPrincipal();
     });
   });

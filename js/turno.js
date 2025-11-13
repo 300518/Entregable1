@@ -1,236 +1,240 @@
-/* turno.js
-   Simulador de Turno para entrega Entregable1+Apellido
-*/
 
-// ---------- Variables y constantes ----------
-const NOMBRE_LOCAL = "Turno de atención Ejecutivo Banco"; // constante
-let colaTurnos = []; // array que contiene objetos {numero, nombre}
-let siguienteNumero = 1; // variable que aumenta con cada turno creado
-let totalAtendidos = 0; // estadística
-
-// ---------- Funciones (entrada → procesamiento → salida) ----------
-
-/**
- * entrada: solicita nombre (prompt)
- * proceso: crea un objeto turno y lo agrega al array
- * salida: confirma con alert y registra en consola
- */
-function sacarTurno() {
-  // Entrada
-  let nombre = prompt("Ingrese nombre para sacar turno:");
-
-  // Validaciones simples (condicional)
-  if (!nombre) {
-    alert("No se ingresó un nombre. Operación cancelada.");
-    console.log("Intento de sacar turno sin nombre.");
-    return; // salida temprana
+// ---------- Constantes ----------
+const LS_KEYS = {
+    COLA: 'sim_colaturnos_v1',
+    SIGUIENTE: 'sim_siguiente_v1',
+    ATENDIDOS: 'sim_atendidos_v1'
+  };
+  
+  let colaTurnos = [];
+  let siguienteNumero = 1;
+  let totalAtendidos = 0;
+  
+  function saveState() {
+    localStorage.setItem(LS_KEYS.COLA, JSON.stringify(colaTurnos));
+    localStorage.setItem(LS_KEYS.SIGUIENTE, String(siguienteNumero));
+    localStorage.setItem(LS_KEYS.ATENDIDOS, String(totalAtendidos));
   }
-
-  // Procesamiento
-  const turno = { numero: siguienteNumero, nombre: nombre.trim() };
-  colaTurnos.push(turno);
-  siguienteNumero++;
-
-  // Salida
-  alert("Turno sacado:\nNº " + turno.numero + " — " + turno.nombre);
-  console.log("Nuevo turno agregado:", turno);
-}
-
-/**
- * entrada: no requiere (es función de consulta)
- * proceso: recorre la cola con un bucle for
- * salida: imprime la cola en la consola (formato legible)
- */
-function verColaEnConsola() {
-  console.log("---- Cola de turnos en " + NOMBRE_LOCAL + " ----");
-  console.log("Turnos pendientes: " + colaTurnos.length);
-  if (colaTurnos.length === 0) {
-    console.log("No hay turnos en espera.");
-    return;
-  }
-
-  // Uso de for para listar los elementos (ciclo pedido en la consigna)
-  for (let i = 0; i < colaTurnos.length; i++) {
-    const t = colaTurnos[i];
-    console.log((i + 1) + ". Turno N°" + t.numero + " — " + t.nombre);
-  }
-  console.log("-----------------------------------------------");
-}
-
-/**
- * entrada: confirmación para atender (confirm)
- * proceso: si hay turnos, extrae el primero (shift)
- * salida: muestra alert + log en consola del atendido
- */
-function atenderSiguiente() {
-  if (colaTurnos.length === 0) {
-    alert("No hay turnos para atender.");
-    console.log("Atender solicitado pero la cola está vacía.");
-    return;
-  }
-
-  // Confirmación antes de atender
-  const confirma = confirm("¿Deseas atender al siguiente cliente? (Sí = atender)");
-  if (!confirma) {
-    console.log("Atender cancelado por el usuario.");
-    return;
-  }
-
-  // Procesamiento: atender (FIFO)
-  const atendido = colaTurnos.shift();
-  totalAtendidos++;
-
-  // Salida: mostrar resultado
-  alert("Atendiendo:\nN° " + atendido.numero + " — " + atendido.nombre);
-  console.log("Atendido:", atendido);
-}
-
-/**
- * entrada: prompt pidiendo el número a cancelar
- * proceso: busca en el array y elimina si existe (uso de ciclo + condicional)
- * salida: informa por alert/console si fue cancelado o no encontrado
- */
-function cancelarTurnoPorNumero() {
-  if (colaTurnos.length === 0) {
-    alert("No hay turnos para cancelar.");
-    console.log("Cancelar turno solicitado pero cola vacía.");
-    return;
-  }
-
-  const input = prompt("Ingrese el número de turno a cancelar (por ejemplo: 3):");
-  const numero = parseInt(input, 10);
-
-  if (isNaN(numero)) {
-    alert("Número inválido. Operación cancelada.");
-    console.log("Número inválido recibido en cancelarTurnoPorNumero:", input);
-    return;
-  }
-
-  // Buscar el índice del turno con ese número
-  let idx = -1;
-  for (let i = 0; i < colaTurnos.length; i++) {
-    if (colaTurnos[i].numero === numero) {
-      idx = i;
-      break;
+  
+  function loadState() {
+    const rawCola = localStorage.getItem(LS_KEYS.COLA);
+    const rawSig = localStorage.getItem(LS_KEYS.SIGUIENTE);
+    const rawAtt = localStorage.getItem(LS_KEYS.ATENDIDOS);
+  
+    if (rawCola) {
+      try { colaTurnos = JSON.parse(rawCola); } catch(e){ colaTurnos = []; }
     }
+    if (rawSig) siguienteNumero = Number(rawSig) || 1;
+    if (rawAtt) totalAtendidos = Number(rawAtt) || 0;
   }
-
-  if (idx === -1) {
-    alert("No se encontró un turno con el número " + numero);
-    console.log("Intento de cancelar turno no existente: N°" + numero);
-    return;
-  }
-
-  // Eliminar usando, se averigua la función splice.
-  const eliminado = colaTurnos.splice(idx, 1)[0];
-  alert("Turno cancelado:\nN° " + eliminado.numero + " — " + eliminado.nombre);
-  console.log("Turno eliminado:", eliminado);
-}
-
-/**
- * entrada: ninguna
- * proceso: compone un resumen de estadísticas
- * salida: muestra el resumen concatenado con saltos de línea en alert y consola
- */
-function mostrarEstadisticas() {
-  const pendientes = colaTurnos.length;
-  // concatenación con saltos de línea
-  const mensaje = 
-    "Resumen del día en " + NOMBRE_LOCAL + ":\n" +
-    "Total atendidos: " + totalAtendidos + "\n" +
-    "Turnos pendientes: " + pendientes + "\n\n" +
-    "Cola actual (ver en consola para más detalle).";
-
-  alert(mensaje);
-  console.log("Estadísticas:", { totalAtendidos, pendientes, colaTurnos });
-  verColaEnConsola(); // llamada a otra función para mostrar detalle
-}
-
-// ---------- Menú principal (controlador) ----------
-
-/**
- * Menú: usa prompt para mostrar opciones y un bucle while para repetir
- * Invoca las funciones anteriores según elección del usuario.
- */
-function menuPrincipal() {
-  console.log("Iniciando Turnero - " + NOMBRE_LOCAL);
-  let opcion = "";
-
-  // Usamos un bucle do..while para asegurar al menos una ejecución
-  do {
-    opcion = prompt(
-      "MENU - Turnero " + NOMBRE_LOCAL + "\n\n" +
-      "1 - Sacar turno\n" +
-      "2 - Ver cola (Consola)\n" +
-      "3 - Atender siguiente\n" +
-      "4 - Cancelar turno por número\n" +
-      "5 - Mostrar estadísticas\n" +
-      "6 - Llenar cola de prueba (agregar 5 turnos) [utilidad para pruebas]\n" +
-      "7 - Salir\n\n" +
-      "Ingresa el número de la opción:"
-    );
-
-    switch (opcion) {
-      case "1":
-        sacarTurno();
-        break;
-      case "2":
-        verColaEnConsola();
-        break;
-      case "3":
-        atenderSiguiente();
-        break;
-      case "4":
-        cancelarTurnoPorNumero();
-        break;
-      case "5":
-        mostrarEstadisticas();
-        break;
-      case "6":
-        llenarColaDePrueba();
-        break;
-      case "7":
-        console.log("Usuario salió del menú.");
-        break;
-      default:
-        if (opcion !== null) {
-          alert("Opción inválida. Ingresa un número del 1 al 7.");
-        } else {
-          // usuario presionó Cancel en el prompt: confirmamos salida
-          const salir = confirm("¿Deseas salir del simulador?");
-          if (salir) {
-            opcion = "7"; // forzar salida
-          }
-        }
+  
+  const $ = sel => document.querySelector(sel);
+  const formSacar = $('#form-sacar-turno');
+  const inputNombre = $('#nombre-input');
+  const btnAtender = $('#btn-atender');
+  const btnLlenarPrueba = $('#btn-llenar-prueba');
+  const btnLimpiar = $('#btn-limpiar');
+  const colaList = $('#cola-list');
+  const spanSiguiente = $('#siguiente-num');
+  const spanAtendidos = $('#total-atendidos');
+  const spanPendientes = $('#pendientes');
+  const formCancelar = $('#form-cancelar-turno');
+  const inputCancelNum = $('#cancel-num-input');
+  
+  function renderCola() {
+    colaList.innerHTML = '';
+    if (colaTurnos.length === 0) {
+      const li = document.createElement('div');
+      li.className = 'list-group-item';
+      li.textContent = 'No hay turnos en espera.';
+      colaList.appendChild(li);
+    } else {
+      colaTurnos.forEach((t) => {
+        const el = document.createElement('div');
+        el.className = 'list-group-item d-flex justify-content-between align-items-center';
+        el.innerHTML = `
+          <div>
+            <strong>N° ${t.numero}</strong> — ${escapeHtml(t.nombre)}
+          </div>
+          <div class="btn-group btn-group-sm" role="group" aria-label="acciones">
+            <button class="btn btn-outline-success btn-att">Atender</button>
+            <button class="btn btn-outline-danger btn-cancel">Cancelar</button>
+          </div>
+        `;
+        // botones por item
+        el.querySelector('.btn-att').addEventListener('click', () => {
+          atenderTurnoEspecifico(t.numero);
+        });
+        el.querySelector('.btn-cancel').addEventListener('click', () => {
+          cancelarTurnoPorNumeroUI(t.numero);
+        });
+        colaList.appendChild(el);
+      });
     }
-  } while (opcion !== "7");
-
-  alert("Gracias por usar el simulador. Revisa la consola para detalles.");
-  console.log("Turnero finalizado. Estado final:", { siguienteNumero, totalAtendidos, colaTurnos });
-}
-
-/**
- * Función auxiliar de prueba (entrada: ninguna, proceso: agrega varios turnos, salida: console)
- * demuestra el uso de ciclos for para agregar varios elementos.
- */
-function llenarColaDePrueba() {
-  const nombresPrueba = ["Ana", "Luis", "María", "Carlos", "Sofía"];
-  for (let i = 0; i < nombresPrueba.length; i++) {
-    const t = { numero: siguienteNumero, nombre: nombresPrueba[i] };
-    colaTurnos.push(t);
+    spanSiguiente.textContent = String(siguienteNumero);
+    spanAtendidos.textContent = String(totalAtendidos);
+    spanPendientes.textContent = String(colaTurnos.length);
+  }
+  
+  // escape básico para evitar inyección
+  function escapeHtml(text) {
+    const map = { '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'};
+    return String(text).replace(/[&<>"']/g, m => map[m]);
+  }
+  
+  // ---------- Lógica (versión DOM) ----------
+  function sacarTurnoUI(nombre) {
+    const nombreTrim = String(nombre || '').trim();
+    if (!nombreTrim) {
+      showInlineAlert('Ingresa un nombre válido.', 'warning');
+      return;
+    }
+    const turno = { numero: siguienteNumero, nombre: nombreTrim };
+    colaTurnos.push(turno);
     siguienteNumero++;
+    saveState();
+    renderCola();
+    showInlineAlert(`Turno N° ${turno.numero} agregado.`, 'success');
+    inputNombre.value = '';
   }
-  alert("Se agregaron " + nombresPrueba.length + " turnos de prueba.");
-  console.log("Cola rellenada con turnos de prueba.");
-}
-
-// ---------- Llamada inicial para ejecutar el menú al cargar la página ----------
-//menuPrincipal();
-document.addEventListener("DOMContentLoaded", () => {
-    const boton = document.getElementById("btnIniciar");
-    //Se genera y averigua función para el click de botonera.
-    boton.addEventListener("click", () => {
-      alert("¡Bienvenido al simulador de turnos!\nTe recordamos abrir la consola previamente\nSi no lo hiciste, hazlo y actualiza la página");
-      menuPrincipal();
+  
+  function atenderSiguienteUI() {
+    if (colaTurnos.length === 0) {
+      showInlineAlert('No hay turnos para atender.', 'info');
+      return;
+    }
+    const atendido = colaTurnos.shift();
+    totalAtendidos++;
+    saveState();
+    renderCola();
+    showInlineAlert(`Atendiendo N° ${atendido.numero} — ${atendido.nombre}`, 'success');
+  }
+  
+  function atenderTurnoEspecifico(numero) {
+    const idx = colaTurnos.findIndex(t => t.numero === Number(numero));
+    if (idx === -1) { showInlineAlert('Turno no encontrado.', 'warning'); return; }
+    const atendido = colaTurnos.splice(idx,1)[0];
+    totalAtendidos++;
+    saveState();
+    renderCola();
+    showInlineAlert(`Atendiendo N° ${atendido.numero} — ${atendido.nombre}`, 'success');
+  }
+  
+  function cancelarTurnoPorNumeroUI(numero) {
+    const idx = colaTurnos.findIndex(t => t.numero === Number(numero));
+    if (idx === -1) { showInlineAlert('No se encontró ese número.', 'warning'); return; }
+    const eliminado = colaTurnos.splice(idx,1)[0];
+    saveState();
+    renderCola();
+    showInlineAlert(`Se canceló N° ${eliminado.numero} — ${eliminado.nombre}`, 'info');
+  }
+  
+  function cancelarTurnoPorNumeroFormulario(numero) {
+    // llamada desde formulario
+    cancelarTurnoPorNumeroUI(numero);
+    inputCancelNum.value = '';
+  }
+  
+  // llenar la cola
+  function llenarColaDePrueba() {
+    const nombresPrueba = ["Paula","Luis","Alvarito","Carlos","Sofía"];
+    nombresPrueba.forEach(n => {
+      colaTurnos.push({ numero: siguienteNumero, nombre: n });
+      siguienteNumero++;
     });
-  });
+    saveState();
+    renderCola();
+    showInlineAlert('Se añadieron turnos de prueba.', 'success');
+  }
+  
+  function resetSimulador() {
+    if (!confirm('¿Seguro deseas resetear todo el simulador? Esta acción borrará datos guardados.')) return;
+    colaTurnos = [];
+    siguienteNumero = 1;
+    totalAtendidos = 0;
+    saveState();
+    renderCola();
+    showInlineAlert('Simulador reseteado.', 'info');
+  }
+  
+  const alertContainerId = 'sim-alert-container';
+  function ensureAlertContainer() {
+    if (document.getElementById(alertContainerId)) return;
+    const c = document.createElement('div');
+    c.id = alertContainerId;
+    c.style.position = 'fixed';
+    c.style.right = '18px';
+    c.style.top = '18px';
+    c.style.zIndex = 9999;
+    document.body.appendChild(c);
+  }
+  
+  function showInlineAlert(text, type='info', timeout=3000) {
+    ensureAlertContainer();
+    const cont = document.getElementById(alertContainerId);
+    const el = document.createElement('div');
+    const bs = {
+      success: 'alert-success',
+      info: 'alert-info',
+      warning: 'alert-warning',
+      danger: 'alert-danger'
+    };
+    el.className = `alert ${bs[type] || bs.info} fade show`;
+    el.role = 'alert';
+    el.style.minWidth = '220px';
+    el.style.marginTop = '6px';
+    el.innerHTML = text;
+    cont.appendChild(el);
+    setTimeout(() => {
+      el.classList.remove('show');
+      el.classList.add('hide');
+      setTimeout(() => el.remove(), 400);
+    }, timeout);
+  }
+  
+  function eventos() {
+    // sacar turno por formulario
+    formSacar.addEventListener('submit', (e) => {
+      e.preventDefault();
+      sacarTurnoUI(inputNombre.value);
+    });
+  
+    // atender siguiente
+    btnAtender.addEventListener('click', (e) => {
+      atenderSiguienteUI();
+    });
+  
+    // llenar prueba
+    btnLlenarPrueba.addEventListener('click', (e) => {
+      llenarColaDePrueba();
+    });
+  
+    // cancelar por formulario
+    formCancelar.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const num = Number(inputCancelNum.value);
+      if (isNaN(num) || num <= 0) {
+        showInlineAlert('Ingresa un número válido.', 'warning'); return;
+      }
+      cancelarTurnoPorNumeroFormulario(num);
+    });
+  
+    // reset
+    btnLimpiar.addEventListener('click', (e) => {
+      resetSimulador();
+    });
+  
+    document.addEventListener('keydown', (ev) => {
+      if (ev.key === 'c') { inputNombre.focus(); }
+    });
+  }
+  
+  // ---------- Init ----------
+  function init() {
+    loadState();
+    renderCola();
+    eventos();
+  }
+  
+  document.addEventListener('DOMContentLoaded', init);
+  

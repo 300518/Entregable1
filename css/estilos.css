@@ -1,0 +1,18 @@
+body {
+    background: #f8f9fa;
+}
+
+.card {
+    border-radius: 8px;
+}
+
+#cola-list .list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.small-muted {
+    font-size: 0.85rem;
+    color: #666;
+}

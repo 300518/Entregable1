@@ -36,7 +36,7 @@ class TurnManager {
     this._cargarEstado();
   }
 
-  _saveEstado() {
+  _guardarEstado() {
     try {
       localStorage.setItem(this._lsKeys.COLA, JSON.stringify(this._cola));
       localStorage.setItem(
@@ -76,7 +76,7 @@ class TurnManager {
     const turno = { numero: this._siguienteNumero, nombre: nombreTrim };
     this._cola.push(turno);
     this._siguienteNumero += 1;
-    this._saveEstado();
+    this._guardarEstado();
     return { turno, cola: [...this._cola] };
   }
 
@@ -85,7 +85,7 @@ class TurnManager {
     if (this._cola.length === 0) return { atendido: null };
     const atendido = this._cola.shift();
     this._totalAtendidos += 1;
-    this._saveEstado();
+    this._guardarEstado();
     return { atendido, cola: [...this._cola] };
   }
 
@@ -98,7 +98,7 @@ class TurnManager {
     if (idx === -1) return { error: "No encontrado" };
     const atendido = this._cola.splice(idx, 1)[0];
     this._totalAtendidos += 1;
-    this._saveEstado();
+    this._guardarEstado();
     return { atendido, cola: [...this._cola] };
   }
 
@@ -107,7 +107,7 @@ class TurnManager {
     const idx = this._cola.findIndex((t) => t.numero === Number(numero));
     if (idx === -1) return { error: "No encontrado" };
     const eliminado = this._cola.splice(idx, 1)[0];
-    this._saveEstado();
+    this._guardarEstado();
     return { eliminado, cola: [...this._cola] };
   }
 
@@ -116,7 +116,7 @@ class TurnManager {
       this._cola.push({ numero: this._siguienteNumero, nombre: String(n) });
       this._siguienteNumero++;
     });
-    this._saveEstado();
+    this._guardarEstado();
     return { cola: [...this._cola] };
   }
 
@@ -125,7 +125,7 @@ class TurnManager {
     this._cola = [];
     this._siguienteNumero = 1;
     this._totalAtendidos = 0;
-    this._saveEstado();
+    this._guardarEstado();
     return { canceled: false, cola: [...this._cola] };
   }
 

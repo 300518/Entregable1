@@ -4,7 +4,9 @@ const DEFAULT_LS_KEYS = {
   ATENDIDOS: "sim_atendidos_v1",
 };
 
-
+/*  
+   * agregarTurno(cola, nombre, siguienteNumero) Se agrega cliente a la cola .
+   */
 function agregarTurno(cola, nombre, siguienteNumero) {
   const nombreTrim = String(nombre || "").trim();
   if (!nombreTrim)
@@ -19,7 +21,9 @@ function agregarTurno(cola, nombre, siguienteNumero) {
   };
 }
 
-
+  /*  
+   * atenderTurno(cola) Atiende turno .
+   */
 function atenderTurno(cola) {
   if (!Array.isArray(cola) || cola.length === 0)
     return { atendido: null, nuevaCola: [...cola] };
@@ -27,7 +31,10 @@ function atenderTurno(cola) {
   return { atendido, nuevaCola: resto };
 }
 
-class TurnManager {
+/*
+   * Clase que mantiene los turnos
+   */
+class TurnoManager {
   constructor(lsKeys = DEFAULT_LS_KEYS) {
     this._lsKeys = lsKeys;
     this._cola = [];
@@ -48,8 +55,7 @@ class TurnManager {
         String(this._totalAtendidos)
       );
     } catch (e) {
-      // Si falla localStorage, no rompemos la app; registramos el error.
-      console.error("Error guardando estado en localStorage", e);
+     
     }
   }
 
@@ -62,14 +68,15 @@ class TurnManager {
       this._siguienteNumero = rawSig ? Number(rawSig) || 1 : 1;
       this._totalAtendidos = rawAtt ? Number(rawAtt) || 0 : 0;
     } catch (e) {
-      console.warn("No se pudo cargar estado. Se usará estado por defecto.", e);
       this._cola = [];
       this._siguienteNumero = 1;
       this._totalAtendidos = 0;
     }
   }
 
- 
+  /*
+   * agregarTurno(nombre) Agregamos un nuevo cliente a la cola .
+   */
   agregarTurno(nombre) {
     const nombreTrim = String(nombre || "").trim();
     if (!nombreTrim) return { error: "Nombre inválido" };
@@ -80,7 +87,9 @@ class TurnManager {
     return { turno, cola: [...this._cola] };
   }
 
-  
+  /*
+   * atenderSiguiente(numero) Atiende al siguiente turno .
+   */
   atenderSiguiente() {
     if (this._cola.length === 0) return { atendido: null };
     const atendido = this._cola.shift();
@@ -89,9 +98,8 @@ class TurnManager {
     return { atendido, cola: [...this._cola] };
   }
 
-  /**
-   * atenderNumero(numero)
-   * - Atiende un turno por número.
+  /*
+   * atenderNumero(numero) Atiende un turno por número.
    */
   atenderNumero(numero) {
     const idx = this._cola.findIndex((t) => t.numero === Number(numero));
@@ -102,7 +110,9 @@ class TurnManager {
     return { atendido, cola: [...this._cola] };
   }
 
-  
+  /*
+   * cancelarTurno(numero) Se cancela el turno por número.
+   */
   cancelarTurno(numero) {
     const idx = this._cola.findIndex((t) => t.numero === Number(numero));
     if (idx === -1) return { error: "No encontrado" };
@@ -238,10 +248,8 @@ function CargarPorEstado(manager, elements) {
 
 /* ---------- Init: solo aquí se consulta el DOM y se enlazan eventos ---------- */
 function init() {
-  // Crear una instancia del manager (sin exponerla globalmente)
-  const manager = new TurnManager();
+  const manager = new TurnoManager();
 
-  // --- Consulta de elementos DOM (solo aquí) ---
   const $ = (sel) => document.querySelector(sel);
   const formSacar = $("#form-sacar-turno");
   const inputNombre = $("#nombre-input");

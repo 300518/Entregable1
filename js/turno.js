@@ -195,9 +195,9 @@ function mostrarAlerta(text, type = "info", timeout = 3000) {
   }, timeout);
 }
 
-function CargarPorEstado(manager, elements) {
+function CargarPorEstado(manager, elementos) {
   const state = manager.saberEstado();
-  const colaList = elements.colaList;
+  const colaList = elementos.colaList;
   colaList.innerHTML = "";
   if (state.cola.length === 0) {
     const li = document.createElement("div");
@@ -226,7 +226,7 @@ function CargarPorEstado(manager, elements) {
             `Atendiendo N° ${r.atendido.numero} — ${r.atendido.nombre}`,
             "success"
           );
-        CargarPorEstado(manager, elements);
+        CargarPorEstado(manager, elementos);
       });
       el.querySelector(".btn-cancel").addEventListener("click", () => {
         const r = manager.cancelarTurno(t.numero);
@@ -236,17 +236,17 @@ function CargarPorEstado(manager, elements) {
             `Se canceló N° ${r.eliminado.numero} — ${r.eliminado.nombre}`,
             "info"
           );
-        CargarPorEstado(manager, elements);
+        CargarPorEstado(manager, elementos);
       });
       colaList.appendChild(el);
     });
   }
-  elements.spanSiguiente.textContent = String(state.siguienteNumero);
-  elements.spanAtendidos.textContent = String(state.totalAtendidos);
-  elements.spanPendientes.textContent = String(state.pendientes);
+  elementos.spanSiguiente.textContent = String(state.siguienteNumero);
+  elementos.spanAtendidos.textContent = String(state.totalAtendidos);
+  elementos.spanPendientes.textContent = String(state.pendientes);
 }
 
-/* ---------- Init: solo aquí se consulta el DOM y se enlazan eventos ---------- */
+/*Para ver el inicio */
 function init() {
   const manager = new TurnoManager();
 
@@ -263,12 +263,12 @@ function init() {
   const formCancelar = $("#form-cancelar-turno");
   const inputCancelNum = $("#cancel-num-input");
 
-  const elements = { colaList, spanSiguiente, spanAtendidos, spanPendientes };
+  const elementos = { colaList, spanSiguiente, spanAtendidos, spanPendientes };
 
-  // --- Render inicial ---
-  CargarPorEstado(manager, elements);
+  
+  CargarPorEstado(manager, elementos);
 
-  // --- Eventos ---
+ // Even
   formSacar.addEventListener("submit", (e) => {
     e.preventDefault();
     const r = manager.agregarTurno(inputNombre.value);
@@ -278,7 +278,7 @@ function init() {
     }
     mostrarAlerta(`Turno N° ${r.turno.numero} agregado.`, "success");
     inputNombre.value = "";
-    CargarPorEstado(manager, elements);
+    CargarPorEstado(manager, elementos);
   });
 
   btnAtender.addEventListener("click", () => {
@@ -289,13 +289,13 @@ function init() {
         `Atendiendo N° ${r.atendido.numero} — ${r.atendido.nombre}`,
         "success"
       );
-    CargarPorEstado(manager, elements);
+    CargarPorEstado(manager, elementos);
   });
 
   btnLlenarPrueba.addEventListener("click", () => {
     manager.llenarTurno(["Paula", "Luis", "Alvarito", "Carlos", "Sofía"]);
     mostrarAlerta("Se añadieron turnos de prueba.", "success");
-    CargarPorEstado(manager, elements);
+    CargarPorEstado(manager, elementos);
   });
 
   formCancelar.addEventListener("submit", (e) => {
@@ -314,7 +314,7 @@ function init() {
       );
       inputCancelNum.value = "";
     }
-    CargarPorEstado(manager, elements);
+    CargarPorEstado(manager, elementos);
   });
 
   btnLimpiar.addEventListener("click", () => {
@@ -324,7 +324,7 @@ function init() {
       )
     );
     mostrarAlerta("Simulador reseteado.", "info");
-    CargarPorEstado(manager, elements);
+    CargarPorEstado(manager, elementos);
   });
 
   document.addEventListener("keydown", (ev) => {

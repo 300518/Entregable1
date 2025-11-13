@@ -64,11 +64,11 @@ button.btn-danger:hover {
     background-color: #a71d2a;
 }
 
-button.btn-success {
+button.btn-exito {
     background-color: #28a745;
     color: #fff;
 }
-button.btn-success:hover {
+button.btn-exito:hover {
     background-color: #1e7e34;
 }
 
